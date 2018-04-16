@@ -1,4 +1,4 @@
-8601 nodes in total
+8604 nodes in total
 Modifying this file won't have any effect!
 
 block.tap: ALL
@@ -1218,6 +1218,7 @@ ftbutilities.claims.block.edit.industrialforegoing.energy_field_provider: OP
 ftbutilities.claims.block.edit.industrialforegoing.essence: OP
 ftbutilities.claims.block.edit.industrialforegoing.fluid_crafter: OP
 ftbutilities.claims.block.edit.industrialforegoing.fluid_pump: OP
+ftbutilities.claims.block.edit.industrialforegoing.fluiddictionary_converter: OP
 ftbutilities.claims.block.edit.industrialforegoing.hydrator: OP
 ftbutilities.claims.block.edit.industrialforegoing.if.pink_slime: OP
 ftbutilities.claims.block.edit.industrialforegoing.if.protein: OP
@@ -3610,6 +3611,7 @@ ftbutilities.claims.block.interact.industrialforegoing.energy_field_provider: OP
 ftbutilities.claims.block.interact.industrialforegoing.essence: OP
 ftbutilities.claims.block.interact.industrialforegoing.fluid_crafter: OP
 ftbutilities.claims.block.interact.industrialforegoing.fluid_pump: OP
+ftbutilities.claims.block.interact.industrialforegoing.fluiddictionary_converter: OP
 ftbutilities.claims.block.interact.industrialforegoing.hydrator: OP
 ftbutilities.claims.block.interact.industrialforegoing.if.pink_slime: OP
 ftbutilities.claims.block.interact.industrialforegoing.if.protein: OP
@@ -6538,6 +6540,7 @@ ftbutilities.claims.item.industrialforegoing.fluid_crafter: ALL
 ftbutilities.claims.item.industrialforegoing.fluid_pump: ALL
 ftbutilities.claims.item.industrialforegoing.fluid_transfer_addon_pull: ALL
 ftbutilities.claims.item.industrialforegoing.fluid_transfer_addon_push: ALL
+ftbutilities.claims.item.industrialforegoing.fluiddictionary_converter: ALL
 ftbutilities.claims.item.industrialforegoing.hydrator: ALL
 ftbutilities.claims.item.industrialforegoing.item_splitter: ALL
 ftbutilities.claims.item.industrialforegoing.itemstack_transfer_addon_pull: ALL
