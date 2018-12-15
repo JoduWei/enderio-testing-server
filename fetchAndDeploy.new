@@ -1,0 +1,163 @@
+#!/bin/bash
+
+basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $basedir
+source "config/base.cfg"
+echo "source ""config/base.cfg"
+serverdir=$basedir"server/"
+moddir=$serverdir"mods/"
+
+echo $serverdir
+echo $moddir
+
+smthchanged=false
+minecraftport=`grep server-port "server/server.properties" |cut -d'=' -f2 | tr -d '\040\011\012\015'`
+
+
+modEntries=""
+modPackEntries=""
+
+for file in config/jarconfig.d/*.cfg; do
+    [ -e "$file" ] || continue
+    echo "$file"
+
+	source $file
+	echo $name
+	echo $jarPrefix
+	echo $artifact
+	echo $jenkinsURL
+	echo $versionRegex
+	# $name
+	# $jarPrefix
+	# $artifact
+	# $jenkinsURL
+	# $versionRegex
+
+	echo "Parse API data to find file name of latest EnderCore build"
+	file=` echo $(curl -s $jenkinsURL/api/json | jq -r '.artifacts['$artifact'].fileName') | xargs`
+	url=`echo $jenkinsURL"/artifact/build/libs/$file" | xargs`
+	jarPrefix=`echo $jarPrefix | xargs`
+	modEntries=$modEntries'<li><a href=\"'$url'\">'$file'</a></li>'
+	version=`perl -e 'if ($ARGV[0] =~ '$versionRegex') { $a = $1; $a =~ s/-//g; print lc $a }' $file`
+	echo 'if ($ARGV[0] =~ '$versionRegex') { $a = $1; $a =~ s/-//g; print lc $a }' $file
+	modPackEntries=$modPackEntries''$name','$version','$url',mod\n'
+		echo "deleting $moddir""$jarPrefix"
+
+	echo "Check if $name is up to date"
+	if [ -e "tmp"/$file ]; then
+		echo "$name is up to date!"
+		echo "faiiiiil rm -f $moddir$jarPrefix"
+	else
+		smthchanged=true
+		# Remove old bot jar
+		echo "Deleting old $name jar"
+		rm -f "tmp/"$jarPrefix
+		# Download new bot jar
+		echo "Downloading new file: $enderCoreFile"
+		wget $url -P tmp
+
+		echo "deleting $moddir""$jarPrefix"
+		rm -f $moddir$jarPrefix
+
+		echo "Copy $file into server to mods"
+		cp "tmp/"$file $moddir
+  fi
+done
+
+for file in config/optconfig.d/*.cfg; do
+	[ -e "$file" ] || continue
+	echo "$file"
+	source $file
+	echo "Parse API data to find file name of latest EnderCore build"
+	file=` echo $(curl -s $jenkinsURL/api/json | jq -r '.artifacts['$artifact'].fileName') | xargs`
+	url=`echo $jenkinsURL"/artifact/build/libs/$file" | xargs`
+	jarPrefix=`echo $jarPrefix | xargs`
+	modEntries=$modEntries'<li><a href=\"'$url'\">'$file'</a></li>'
+	version=`perl -e 'if ($ARGV[0] =~ '$versionRegex') { $a = $1; $a =~ s/-//g; print lc $a }' $file`
+	echo 'if ($ARGV[0] =~ '$versionRegex') { $a = $1; $a =~ s/-//g; print lc $a }' $file
+	modPackEntries=$modPackEntries''$name','$version','$url',mod\n'
+this ^ doesn_t work, it needs to keep the old version there...
+	echo "deleting $moddir""$jarPrefix"
+	echo "Check if $name is up to date"
+	if [ -e "tmp"/$file ]; then
+		echo "$name is up to date!"
+		echo "faiiiiil rm -f $moddir$jarPrefix"
+	else
+		if [ "$smthchanged" = true ] ; then
+			# Remove old bot jar
+			echo "Deleting old $name jar"
+			rm -f "tmp/"$jarPrefix
+			# Download new bot jar
+			echo "Downloading new file: $enderCoreFile"
+			wget $url -P tmp
+			echo "deleting $moddir""$jarPrefix"
+			rm -f $moddir$jarPrefix
+			echo "Copy $file into server to mods"
+			cp "tmp/"$file $moddir
+		fi
+	fi
+done
+
+IFS=
+echo -e `cat html/enderiotestpack.cfg`'\n'$modPackEntries > $webroot'enderiotestpack.cfg'
+echo -e $modPackEntries $webroot'enderiotestpack.cfg'
+
+nc -z localhost $minecraftport
+ncReturn=$?
+
+if ! screen -list | grep -q "mcscreen"; then
+  echo "No current Minecraft instance found"
+  screen -dmS mcscreen
+fi
+ echo "checking minecraft port $minecraftport"
+if [ "$smthchanged" = true ] ; then
+
+	rm -Rf $webroot"*"
+
+	if [ $ncReturn -eq 0 ]; then
+		echo "server is running"
+		echo "Terminating current Minecraft instance"
+
+		screen -S mcscreen -p 0 -X stuff "say installed new Ender-IO/Core version, restarting server in 30 seconds ^M"
+		sleep 10 &
+		wait %1
+		screen -S mcscreen -p 0 -X stuff "say 20 seconds remaining ^M"
+		sleep 10 &
+		wait %1
+		screen -S mcscreen -p 0 -X stuff "say 10 seconds remaining ^M"
+
+		COUNTER=9
+			 while [  $COUNTER -gt 0 ]; do
+			  screen -S mcscreen -p 0 -X stuff "say ... $COUNTER ^M"
+			  sleep 1 &
+			  wait %1
+
+				 let COUNTER=COUNTER-1
+			 done
+
+		screen -S mcscreen -p 0 -X stuff "stop^M"
+		sleep 10 &
+		wait %1
+	else
+		echo "s"
+	fi
+	cp -r html/* $webroot
+fi
+nc -z localhost $minecraftport
+ncReturn=$?
+
+if [ $ncReturn -eq 1 ]; then
+  screen -S mcscreen -p 0 -X stuff 'cd '$serverdir'^M'
+  echo "running command: $runCommand"
+  screen -S mcscreen -p 0 -X stuff 'java -jar forge-universal.jar nogui -Xms10G -Xmx10G -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+CMSParallelRemarkEnabled -XX:MaxGCPauseMillis=50 -XX:+DisableExplicitGC -XX:+AggressiveOpts -XX:+UseFastAccessorMethods -XX:+UseBiasedLocking -XX:TargetSurvivorRatio=90  -Dfml.queryResult=confirm ^M'
+  screen -S mcscreen -p 0 -X eval "stuff '$runCommand'\015"
+fi
+
+	sass "html/css/util.scss" $webroot"css/util.css"
+	sass "html/css/main.scss" $webroot"css/main.css"
+
+
+IFS=
+echo -e `cat html/enderiotestpack.cfg`'\n'$modPackEntries > $webroot'enderiotestpack.cfg'
+echo -e $modPackEntries $webroot'enderiotestpack.cfg'
+

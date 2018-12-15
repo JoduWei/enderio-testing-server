@@ -1,0 +1,27 @@
+// This file stores rank definitions.
+// 
+// [name]
+// permission: value
+// 
+// Add [name extends parent_name] to make this rank include all permissions from parent_name rank.
+// Add [name is default_player_rank] or [name is default_op_rank] to make this rank default for players/ops that don't have a rank set explicitly.
+// 
+// For more info visit https://guides.latmod.com/ftbutilities/ranks/
+// To see the list of permission nodes, open all_permissions.html in browser or all_permissions_full_list.txt
+
+[player is default_player_rank]
+ftbu.display.admin_info: false
+ftbu.display.permissions: true
+command.ftbutilities.ranks.get: true
+ftbu.homes.list_other: false
+ftbutilities.claims.block.edit.openblocks.grave: true
+
+[moderator]
+ftbu.claims.modify.others: true
+ftbu.claims.block.interact: true
+ftbu.claims.block.edit: true
+command.ban: true
+command.tp: true
+
+[admin is default_op_rank]
+command: true
